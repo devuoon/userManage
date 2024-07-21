@@ -1,23 +1,19 @@
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
+const express = require('express');
+const path = require('path');
+const app = express();
+const port = 3000;
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var TestRouter = require('./routes/test');  // 이 줄이 올바른지 확인
-
-var app = express();
-
-app.use(logger('dev'));
+// JSON 본문을 파싱하기 위한 미들웨어 설정
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
-app.use(cookieParser());
+app.use(express.urlencoded({ extended: true }));
+
+// 정적 파일 제공
 app.use(express.static(path.join(__dirname, 'public')));
 
-console.log('Setting up routes');  // 이 줄을 추가
-app.use('/', indexRouter);
-app.use('/users', usersRouter);
-app.use('/api/member', TestRouter);  // 이 줄이 올바른지 확인
+// 라우터 파일 가져오기
+const memberRouter = require('./routes/member');
+app.use('/api/member', memberRouter);
 
-module.exports = app;
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+});

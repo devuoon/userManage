@@ -17,7 +17,7 @@
 <div class="wrap">
   <div class="d-flex justify-content-end mb-2">
     <button class="btn btn-outline-secondary mx-2">수정</button>
-    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" id="addMemberBtn">
       추가
     </button>
   </div>
@@ -48,60 +48,174 @@
         </div>
         <div class="modal-body">
           <div class="form-floating mb-3">
-            <input type="text" class="form-control" id="no" placeholder="name@example.com">
+            <input type="text" class="form-control" id="no" placeholder="번호" readonly>
             <label for="no">번호</label>
           </div>
-          <div class="form-floating">
-            <input type="date" class="form-control" id="birth" placeholder="Password">
+          <div class="form-floating mb-3">
+            <input type="date" class="form-control" id="birth" placeholder="생년월일">
             <label for="birth">생년월일</label>
           </div>
-          <div class="form-floating">
-            <input type="text" class="form-control" id="name" placeholder="Password">
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="name" placeholder="이름">
             <label for="name">이름</label>
           </div>
-          <div class="form-floating">
-            <input type="date" class="form-control" id="joinYear" placeholder="Password">
+          <div class="form-floating mb-3">
+            <input type="month" class="form-control" id="joinYear" placeholder="입사년도">
             <label for="joinYear">입사년도</label>
           </div>
-          <div class="form-floating">
-            <input type="text" class="form-control" id="joinMonth" placeholder="Password">
+          <div class="form-floating mb-3">
+            <select class="form-control" id="joinMonth" placeholder="입사월">
+              <option value="1">1월</option>
+              <option value="2">2월</option>
+              <option value="3">3월</option>
+              <option value="4">4월</option>
+              <option value="5">5월</option>
+              <option value="6">6월</option>
+              <option value="7">7월</option>
+              <option value="8">8월</option>
+              <option value="9">9월</option>
+              <option value="10">10월</option>
+              <option value="11">11월</option>
+              <option value="12">12월</option>
+            </select>
             <label for="joinMonth">입사월</label>
           </div>
-          <div class="form-floating">
-            <input type="text" class="form-control" id="introduce" placeholder="Password">
+          <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="introduce" placeholder="소개말">
             <label for="introduce">소개말</label>
           </div>
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-          <button type="button" class="btn btn-primary">등록</button>
+          <button type="button" class="btn btn-primary" id="submitBtn">등록</button>
         </div>
       </div>
     </div>
   </div>
 </div>
-</body>
+
 <script>
+  document.getElementById('addMemberBtn').addEventListener('click', function() {
+    fetch("http://localhost:3000/api/member")
+            .then(response => response.json())
+            .then(data => {
+              const nextNo = data.length + 1;
+              document.getElementById('no').value = nextNo;
+            })
+            .catch(error => console.error('Error:', error));
+  });
+
+
+
+  document.getElementById('submitBtn').addEventListener('click', function() {
+    alert('유저 정보를 등록하시겠습니까?');
+    const no = document.getElementById('no').value;
+    const birth = document.getElementById('birth').value;
+    const name = document.getElementById('name').value;
+    const joinYear = document.getElementById('joinYear').value;
+    const joinMonth = document.getElementById('joinMonth').value;
+    const introduce = document.getElementById('introduce').value;
+
+    const newMember = {
+      no,
+      birth,
+      name,
+      joinYear,
+      joinMonth,
+      introduce
+    };
+
+    fetch("http://localhost:3000/api/member", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(newMember)
+    })
+            .then(response => {
+              if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+              }
+              return response.json();
+            })
+            .then(data => {
+              const tbody = document.getElementById('tBody');
+              const tr = document.createElement('tr');
+              tr.innerHTML = `
+                <td><input type="checkbox"></td>
+                <td>${data.user.no}</td>
+                <td>${data.user.birth}</td>
+                <td>${data.user.name}</td>
+                <td>${data.user.joinYear}</td>
+                <td>${data.user.joinMonth}</td>
+                <td>${data.user.introduce}</td>
+                <td><button class="btn btn-outline-secondary">수정</button></td>
+                <td><button class="btn btn-outline-danger" id="deleteBtn">삭제</button></td>
+              `;
+              tbody.appendChild(tr);
+              // 모달 닫기
+              const modal = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
+              modal.hide();
+              // 폼 초기화
+              document.getElementById('no').value = '';
+              document.getElementById('birth').value = '';
+              document.getElementById('name').value = '';
+              document.getElementById('joinYear').value = '';
+              document.getElementById('joinMonth').value = '';
+              document.getElementById('introduce').value = '';
+            })
+            .catch(error => console.error('Error:', error));
+  });
+
   fetch("http://localhost:3000/api/member")
-          .then((response) => response.json())
+          .then((response) => {
+            if (!response.ok) {
+              throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+          })
           .then((data) => {
             const tbody = document.getElementById('tBody');
             data.forEach((member) => {
               const tr = document.createElement('tr');
               tr.innerHTML = `
-                <td><input type="checkbox"></td>
-                <td>${member.no}</td>
-                <td>${member.birth}</td>
-                <td>${member.name}</td>
-                <td>${member.joinYear}</td>
-                <td>${member.joinMonth}</td>
-                <td>${member.introduce}</td>
-                <td><button class="btn btn-outline-secondary">수정</button></td>
-                <td><button class="btn btn-outline-danger">삭제</button></td>
-              `;
+              <td><input type="checkbox"></td>
+              <td>${member.no}</td>
+              <td>${member.birth}</td>
+              <td>${member.name}</td>
+              <td>${member.joinYear}</td>
+              <td>${member.joinMonth}</td>
+              <td>${member.introduce}</td>
+              <td><button class="btn btn-outline-secondary">수정</button></td>
+              <td><button class="btn btn-outline-danger delete-btn">삭제</button></td>
+            `;
               tbody.appendChild(tr);
             });
           })
           .catch((error) => console.error('Error fetching data:', error));
+
+  document.getElementById('tBody').addEventListener('click', function(event) {
+    if (event.target.classList.contains('delete-btn')) {
+      alert('해당 유저를 삭제하시겠습니까?');
+      const tr = event.target.closest('tr');
+      const no = tr.children[1].textContent; // 해당 행의 `no` 값을 가져옴
+
+      fetch(`http://localhost:3000/api/member/${no}`, {
+        method: 'DELETE'
+      })
+              .then(response => {
+                if (!response.ok) {
+                  throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json();
+              })
+              .then(data => {
+                console.log(data.message);
+                tr.remove(); // 테이블에서 해당 행을 제거
+              })
+              .catch(error => console.error('Error:', error));
+    }
+  });
 </script>
+</body>
 </html>
