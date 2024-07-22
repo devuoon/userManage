@@ -7,13 +7,8 @@ const cache = new NodeCache({ stdTTL: 86400, checkperiod: 86400 });
 
 /* GET users listing. */
 router.get('/', function(req, res, next) {
-    console.log('GET /api/member 라우트 호출됨');
-
     // 캐시에서 데이터를 가져옴
     let users = cache.get('users');
-
-    console.log('캐시에서 가져온 데이터:', users);
-
     if (!users) {
         // 캐시에 데이터가 없는 경우 기본 사용자 목록을 설정
         users = [
@@ -36,17 +31,29 @@ router.get('/', function(req, res, next) {
         ];
         // 데이터를 캐시에 저장
         cache.set('users', users);
-        console.log('기본 사용자 목록을 캐시에 저장:', users);
     }
 
     res.json(users);
 });
 
-/* POST users listing. */
+/* 수정폼에 데이터 가져오기 */
+router.get('/:no', function(req, res, next) {
+    const no = parseInt(req.params.no);
+
+    // 캐시에서 기존 데이터를 가져옴
+    let users = cache.get('users') || [];
+    const user = users.find(user => user.no === no);
+
+    if (user) {
+        res.json(user);
+    } else {
+        res.status(404).json({ message: '사용자를 찾을 수 없습니다' });
+    }
+});
+
+/* POST */
 router.post('/', function(req, res, next) {
-    console.log('POST /api/member 라우트 호출됨');
     const newUser = req.body;
-    console.log('받은 사용자 데이터:', newUser);
 
     // 캐시에서 기존 데이터를 가져옴
     let users = cache.get('users') || [];
@@ -63,20 +70,16 @@ router.post('/', function(req, res, next) {
     // 업데이트된 사용자 목록을 캐시에 저장
     cache.set('users', users);
 
-    console.log('업데이트된 사용자 목록을 캐시에 저장:', users);
-
     res.json({
         message: '사용자 데이터가 성공적으로 수신되었습니다',
         user: newUser
     });
 });
 
-/* PUT update user */
+/* PUT */
 router.put('/:no', function(req, res, next) {
-    console.log('PUT /api/member/:no 라우트 호출됨');
     const no = parseInt(req.params.no);
     const updatedUser = req.body;
-    console.log('받은 사용자 데이터:', updatedUser);
 
     // 캐시에서 기존 데이터를 가져옴
     let users = cache.get('users') || [];
@@ -87,7 +90,6 @@ router.put('/:no', function(req, res, next) {
         users[userIndex] = { ...users[userIndex], ...updatedUser };
         // 업데이트된 사용자 목록을 캐시에 저장
         cache.set('users', users);
-        console.log('업데이트된 사용자 목록을 캐시에 저장:', users);
 
         res.json({
             message: '사용자 데이터가 성공적으로 업데이트되었습니다',
@@ -100,9 +102,7 @@ router.put('/:no', function(req, res, next) {
 
 /* DELETE user */
 router.delete('/:no', function(req, res, next) {
-    console.log('DELETE /api/member/:no 라우트 호출됨');
     const no = parseInt(req.params.no);
-    console.log('삭제할 사용자 번호:', no);
 
     // 캐시에서 기존 데이터를 가져옴
     let users = cache.get('users') || [];
@@ -113,7 +113,6 @@ router.delete('/:no', function(req, res, next) {
         const deletedUser = users.splice(userIndex, 1);
         // 업데이트된 사용자 목록을 캐시에 저장
         cache.set('users', users);
-        console.log('업데이트된 사용자 목록을 캐시에 저장:', users);
 
         res.json({
             message: '사용자 데이터가 성공적으로 삭제되었습니다',
