@@ -1,5 +1,7 @@
+// 필요한 모듈 불러오기
 const express = require('express');
 const path = require('path');
+// Express 애플리케이션 인스턴스 생성
 const app = express();
 const port = 3000;
 
@@ -14,6 +16,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 const memberRouter = require('./routes/member');
 app.use('/api/member', memberRouter);
 
+// 서버 실행
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
 });

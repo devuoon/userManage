@@ -1,7 +1,9 @@
 let currentAction = 'add';
 let currentNo = null;
 
-document.getElementById('addMemberBtn').addEventListener('click', async function() {
+
+document.getElementById('addMemberBtn').addEventListener('click',
+    async function() {
     currentAction = 'add';
     try {
         const response = await fetch("http://localhost:3000/api/member");
