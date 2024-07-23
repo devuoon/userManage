@@ -1,6 +1,19 @@
+// 현재 연도 가져오기
+const currentYear = new Date().getFullYear();
+
+// joinYear input 요소 가져오기
+const joinYearInput = document.getElementById('joinYear');
+
+// 기본값을 현재 연도로 설정
+joinYearInput.value = currentYear;
+
+// 최소값과 최대값 설정
+joinYearInput.min = 1990;
+joinYearInput.max = currentYear;
+
+
 let currentAction = 'add';
 let currentNo = null;
-
 
 document.getElementById('addMemberBtn').addEventListener('click',
     async function() {
